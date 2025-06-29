@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lompat Bela Negara</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to top, #fff27a, #d2fba4);
+      overflow: hidden;
+    }
+
+    #game {
+      width: 100%;
+      height: 300px;
+      position: relative;
+      border-bottom: 5px solid #4caf50;
+      overflow: hidden;
+      background: linear-gradient(to top, #fff77e, #f3ffcc);
+    }
+
+    #character {
+      width: 60px;
+      height: 60px;
+      position: absolute;
+      bottom: 0;
+      left: 60px;
+      background: url('foto-kamu.png') no-repeat center / contain;
+      z-index: 3;
+    }
+
+    #obstacle {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      bottom: 0;
+      right: -60px;
+      background: url('logo-upn.png') no-repeat center / contain;
+      animation: moveObs 2s linear infinite;
+      z-index: 2;
+    }
+
+    @keyframes moveObs {
+      0% { right: -60px; }
+      100% { right: 100vw; }
+    }
+
+    .jump {
+      animation: lompat 0.5s ease-out;
+    }
+
+    @keyframes lompat {
+      0%   { bottom: 0; }
+      50%  { bottom: 120px; }
+      100% { bottom: 0; }
+    }
+
+    #gameover {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.5em;
+      color: #d32f2f;
+      display: none;
+      z-index: 10;
+      text-shadow: 2px 2px 4px #fffde7;
+      font-weight: bold;
+    }
+
+    .grow-upn {
+      animation: growUPN 1.2s ease-in-out forwards;
+      z-index: 9;
+    }
+
+    @keyframes growUPN {
+      0%   { width: 50px; height: 50px; }
+      100% { width: 300px; height: 300px; }
+    }
+
+    .run-backward {
+      animation: kaburBelakang 2s ease-in-out forwards;
+      z-index: 4;
+    }
+
+    @keyframes kaburBelakang {
+      0%   { left: 60px; transform: rotate(0deg); }
+      25%  { transform: rotate(-10deg); }
+      50%  { transform: rotate(10deg); }
+      75%  { transform: rotate(-5deg); }
+      100% { left: -150px; transform: rotate(0deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="game">
+  <div id="character"></div>
+  <div id="obstacle"></div>
+  <div id="gameover">GAME OVER 😵</div>
+</div>
+
+<!-- 🎵 Sound files -->
+<audio id="jumpSound" src="lompat.mp3"></audio>
+<audio id="bgMusic" src="backsound-soft.mp3" autoplay loop></audio>
+<audio id="belaNegara" src="bela-negara.mp3"></audio>
+
+<script>
+  const character = document.getElementById("character");
+  const obstacle = document.getElementById("obstacle");
+  const gameOver = document.getElementById("gameover");
+  const jumpSound = document.getElementById("jumpSound");
+  const belaNegara = document.getElementById("belaNegara");
+  const bgMusic = document.getElementById("bgMusic");
+
+  function jump() {
+    if (!character.classList.contains("jump")) {
+      character.classList.add("jump");
+      jumpSound.currentTime = 0;
+      jumpSound.play();
+      setTimeout(() => character.classList.remove("jump"), 500);
+    }
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space") jump();
+  });
+
+  const checkCollision = setInterval(() => {
+    const charTop = parseInt(window.getComputedStyle(character).getPropertyValue("bottom"));
+    const obsRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
+    const obsLeft = window.innerWidth - obsRight;
+    const charLeft = character.offsetLeft;
+
+    if (
+      obsLeft > charLeft && obsLeft < charLeft + 60 &&
+      charTop < 50
+    ) {
+      obstacle.classList.add("grow-upn");
+      obstacle.style.animation = "none";
+      character.classList.add("run-backward");
+      bgMusic.pause();
+      belaNegara.play();
+      gameOver.style.display = "block";
+      document.removeEventListener("keydown", jump);
+      clearInterval(checkCollision);
+    }
+  }, 10);
+</script>
+
+</body>
+</html>
